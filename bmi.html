@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BMI Calculator - PowerFit Gym</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .bmi-result {
+            transition: all 0.5s ease;
+            max-height: 0;
+            overflow: hidden;
+        }
+        .bmi-result.active {
+            max-height: 1000px;
+        }
+        .progress-ring__circle {
+            transition: stroke-dashoffset 0.5s ease;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+        .tab-button {
+            transition: all 0.3s ease;
+        }
+        .tab-button.active {
+            background-color: #ef4444;
+            color: white;
+        }
+    </style>
+</head>
+<body class="font-sans bg-gray-100">
+    <!-- Navigation -->
+    <nav class="bg-gray-900 text-white shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-dumbbell text-2xl text-red-500"></i>
+                <a href="index.html" class="text-xl font-bold">PowerFit</a>
+            </div>
+            <div class="hidden md:flex space-x-6">
+                <a href="index.html" class="hover:text-red-500">Home</a>
+                <a href="about.html" class="hover:text-red-500">About</a>
+                <a href="workout.html" class="hover:text-red-500">Workouts</a>
+                <a href="supplements.html" class="hover:text-red-500">Supplements</a>
+                <a href="diet.html" class="hover:text-red-500">Diet</a>
+                <a href="booking.html" class="hover:text-red-500">Booking</a>
+                <a href="bmi.html" class="hover:text-red-500 font-medium">BMI Calculator</a>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button id="loginBtn" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-md font-medium transition">Login</button>
+                <button class="md:hidden" id="mobileMenuBtn">
+                    <i class="fas fa-bars text-2xl"></i>
+                </button>
+            </div>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobileMenu" class="md:hidden hidden bg-gray-800 px-4 py-2">
+            <a href="index.html" class="block py-2 hover:text-red-500">Home</a>
+            <a href="about.html" class="block py-2 hover:text-red-500">About</a>
+            <a href="workout.html" class="block py-2 hover:text-red-500">Workouts</a>
+            <a href="supplements.html" class="block py-2 hover:text-red-500">Supplements</a>
+            <a href="diet.html" class="block py-2 hover:text-red-500">Diet</a>
+            <a href="booking.html" class="block py-2 hover:text-red-500">Booking</a>
+            <a href="bmi.html" class="block py-2 hover:text-red-500 font-medium">BMI Calculator</a>
+        </div>
+    </nav>
+
+    <!-- BMI Hero -->
+    <section class="bg-gray-900 text-white py-20 md:py-32">
+        <div class="container mx-auto px-4 text-center">
+            <h1 class="text-4xl md:text-6xl font-bold mb-6">BMI <span class="text-red-500">CALCULATOR</span></h1>
+            <p class="text-xl max-w-2xl mx-auto">Calculate your Body Mass Index and get personalized fitness recommendations</p>
+        </div>
+    </section>
+
+    <!-- BMI Calculator -->
+    <section class="py-12 md:py-20 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <!-- Calculator -->
+                <div class="bg-gray-50 p-8 rounded-xl shadow-md">
+                    <h2 class="text-2xl font-bold mb-6">Calculate Your BMI</h2>
+                    
+                    <form id="bmiForm" class="space-y-6">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+                                <div class="flex space-x-2">
+                                    <button type="button" id="maleBtn" class="tab-button active px-4 py-2 rounded-md w-full">Male</button>
+                                    <button type="button" id="femaleBtn" class="tab-button px-4 py-2 rounded-md w-full">Female</button>
+                                </div>
+                                <input type="hidden" id="gender" value="male">
+                            </div>
+                            <div>
+                                <label for="age" class="block text-sm font-medium text-gray-700 mb-1">Age</label>
+                                <input type="number" id="age" min="15" max="100" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500">
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label for="height" class="block text-sm font-medium text-gray-700 mb-1">Height (cm)</label>
+                            <input type="number" id="height" min="100" max="250" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500">
+                        </div>
+                        
+                        <div>
+                            <label for="weight" class="block text-sm font-medium text-gray-700 mb-1">Weight (kg)</label>
+                            <input type="number" id="weight" min="30" max="300" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500">
+                        </div>
+                        
+                        <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-md font-medium transition">Calculate BMI</button>
+                    </form>
+                </div>
+                
+                <!-- Results -->
+                <div id="bmiResult" class="bmi-result bg-gray-50 p-8 rounded-xl shadow-md">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold">Your Results</h2>
+                        <div class="relative w-20 h-20">
+                            <svg class="progress-ring w-full h-full" viewBox="0 0 36 36">
+                                <circle class="progress-ring__circle-bg" stroke="#e5e7eb" stroke-width="3" fill="none" r="16" cx="18" cy="18"></circle>
+                                <circle class="progress-ring__circle" stroke="#ef4444" stroke-width="3" stroke-dasharray="100 100" stroke-linecap="round" fill="none" r="16" cx="18" cy="18"></circle>
+                            </svg>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <span id="bmiValue" class="text-xl font-bold">--</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="bmiCategory" class="text-center py-2 px-4 rounded-md font-bold mb-6"></div>
+                    
+                    <div class="mb-6">
+                        <h3 class="font-bold mb-2">Weight Status:</h3>
+                        <p id="bmiStatus" class="text-gray-700"></p>
+                    </div>
+                    
+                    <div class="grid grid-cols-3 gap-4 mb-6">
+                        <div class="bg-white p-3 rounded-md text-center">
+                            <div class="text-sm text-gray-500">Healthy BMI Range</div>
+                            <div class="font-bold">18.5 - 24.9</div>
+                        </div>
+                        <div class="bg-white p-3 rounded-md text-center">
+                            <div class="text-sm text-gray-500">Ideal Weight</div>
+                            <div id="idealWeight" class="font-bold">-- kg</div>
+                        </div>
+                        <div class="bg-white p-3 rounded-md text-center">
+                            <div class="text-sm text-gray-500">Weight To {goal}</div>
+                            <div id="weightToGoal" class="font-bold">-- kg</div>
+                        </div>
+                    </div>
+                    
+                    <div class="border-t border-gray-200 pt-4">
+                        <h3 class="font-bold mb-2">Recommendations:</h3>
+                        <div id="recommendations" class="space-y-4">
+                            <!-- Filled by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- BMI Information -->
+    <section class="py-12 md:py-20 bg-gray-100">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-12">ABOUT <span class="text-red-500">BMI</span></h2>
+            
+            <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-xl shadow-md">
+                    <h3 class="text-xl font-bold mb-4">What is BMI?</h3>
+                    <p class="text-gray-700 mb-4">Body Mass Index (BMI) is a person's weight in kilograms divided by the square of height in meters. BMI is an inexpensive and easy screening method for weight category—underweight, healthy weight, overweight, and obesity.</p>
+                    <p class="text-gray-700">BMI does not measure body fat directly, but research has shown that BMI is moderately correlated with more direct measures of body fat. Furthermore, BMI appears to be as strongly correlated with various metabolic and disease outcomes as are these more direct measures of body fatness.</p>
+                </div>
+                
+                <div class="bg-white p-6 rounded-xl shadow-md">
+                    <h3 class="text-xl font-bold mb-4">BMI Categories</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="font-medium">Underweight</span>
+                            <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">Below 18.5</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="font-medium">Normal weight</span>
+                            <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-sm">18.5 - 24.9</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="font-medium">Overweight</span>
+                            <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-sm">25 - 29.9</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="font-medium">Obesity</span>
+                            <span class="bg-red-100 text-red-800 px-2 py-1 rounded text-sm">30 and Above</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 bg-gray-50 p-4 rounded-lg">
+                        <h4 class="font-bold mb-2">Limitations of BMI</h4>
+                        <p class="text-gray-700 text-sm">BMI doesn't account for muscle mass, bone density, overall body composition, and racial and sex differences. Athletes with high muscle mass may have a high BMI but not have excess fat. Older adults may have more body fat than younger adults with same BMI.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <div>
+                    <div class="flex items-center space-x-2 mb-4">
+                        <i class="fas fa-dumbbell text-2xl text-red-500"></i>
+                        <span class="text-xl font-bold">PowerFit</span>
+                    </div>
+                    <p class="text-gray-400">Your premier destination for fitness and wellness. We're committed to helping you achieve your health goals in a supportive environment.</p>
+                </div>
+                <div>
+                    <h4 class="text-lg font-bold mb-4">Quick Links</h4>
+                    <ul class="space-y-2">
+                        <li><a href="index.html" class="text-gray-400 hover:text-red-500 transition">Home</a></li>
+                        <li><a href="about.html" class="text-gray-400 hover:text-red-500 transition">About Us</a></li>
+                        <li><a href="workout.html" class="text-gray-400 hover:text-red-500 transition">Workouts</a></li>
+                        <li><a href="supplements.html" class="text-gray-400 hover:text-red-500 transition">Supplements</a></li>
+                        <li><a href="diet.html" class="text-gray-400 hover:text-red-500 transition">Diet Plans</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-bold mb-4">Services</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-red-500 transition">Personal Training</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-red-500 transition">Group Classes</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-red-500 transition">Nutrition Counseling</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-red-500 transition">Body Composition Analysis</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-red-500 transition">Recovery Services</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-bold mb-4">Contact Us</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li class="flex items-start">
+                            <i class="fas fa-map-marker-alt mt-1 mr-2 text-red-500"></i>
+                            <span>123 Fitness Street, Gym City, 10001</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-phone-alt mt-1 mr-2 text-red-500"></i>
+                            <span>(555) 123-4567</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-envelope mt-1 mr-2 text-red-500"></i>
+                            <span>info@powerfitgym.com</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center">
+                <p class="text-gray-400 mb-4 md:mb-0">© 2023 PowerFit Gym. All rights reserved.</p>
+                <div class="flex space-x-6">
+                    <a href="#" class="text-gray-400 hover:text-red-500 transition">Privacy Policy</a>
+                    <a href="#" class="text-gray-400 hover:text-red-500 transition">Terms of Service</a>
+                    <a href="#" class="text-gray-400 hover:text-red-500 transition">Sitemap</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Set up gender buttons
+        document.getElementById('maleBtn').addEventListener('click', function() {
+            document.getElementById('gender').value = 'male';
+            this.classList.add('active');
+            document.getElementById('femaleBtn').classList.remove('active');
+        });
+        
+        document.getElementById('femaleBtn').addEventListener('click', function() {
+            document.getElementById('gender').value = 'female';
+            this.classList.add('active');
+            document.getElementById('maleBtn').classList.remove('active');
+        });
+
+        // BMI Calculator
+        document.getElementById('bmiForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const height = parseFloat(document.getElementById('height').value) / 100; // Convert cm to m
+            const weight = parseFloat(document.getElementById('weight').value);
+            const age = parseInt(document.getElementById('age').value);
+            const gender = document.getElementById('gender').value;
+            
+            if (height && weight) {
+                const bmi = (weight / (height * height)).toFixed(1);
+                const resultElement = document.getElementById('bmiResult');
+                const categoryElement = document.getElementById('bmiCategory');
+                const statusElement = document.getElementById('bmiStatus');
+                const bmiValueElement = document.getElementById('bmiValue');
+                const idealWeightElement = document.getElementById('idealWeight');
+                const weightToGoalElement = document.getElementById('weightToGoal');
+                const recommendationsElement = document.getElementById('recommendations');
+                
+                // Calculate ideal weight range (Hamwi formula)
+                let idealWeight;
+                if (gender === 'male') {
+                    idealWeight = 50 + (0.9 * (height * 100 - 152));
+                } else {
+                    idealWeight = 45.5 + (0.9 * (height * 100 - 152));
+                }
+                const idealWeightMin = (idealWeight * 0.9).toFixed(1);
+                const idealWeightMax = (idealWeight * 1.1).toFixed(1);
+                
+                // Update UI
+                bmiValueElement.textContent = bmi;
+                
+                // Update progress ring
+                const circle = document.querySelector('.progress-ring__circle');
+                const radius = circle.r.baseVal.value;
+                const circumference = radius * 2 * Math.PI;
+                
+                // BMI scale from 15 to 40 (for visualization purposes)
+                const bmiPercent = Math.min(Math.max((bmi - 15)) / (40 - 15) * 100, 100);
+                const offset = circumference - bmiPercent / 100 * circumference;
+                circle.style.strokeDashoffset = offset;
+                
+                // Determine category and recommendations
+                let category, status, bgColor, weightToGoal, goal;
+                let recommendations = [];
+                
+                if (bmi < 18.5) {
+                    category = "Underweight";
+                    bgColor = "bg-blue-100 text-blue-800";
+                    status = `Your BMI is ${bmi}, which is below the healthy weight range.`;
+                    weightToGoal = (idealWeight * 0.9 - weight).toFixed(1);
+                    goal = "gain";
+                    
+                    recommendations.push({
+                        title: "Nutrition Plan",
+                        icon: "fa-utensils",
+                        content: "Increase calorie intake with nutrient-dense foods. Focus on lean proteins, healthy fats, and complex carbs. Eat 5-6 smaller meals per day."
+                    });
+                    
+                    recommendations.push({
+                        title: "Workout Plan",
+                        icon: "fa-dumbbell",
+                        content: "Strength training 3-4 times per week to build muscle. Focus on compound movements like squats, deadlifts, and bench press. Limit cardio to 2-3 sessions per week."
+                    });
+                    
+                    recommendations.push({
+                        title: "Lifestyle Tips",
+                        icon: "fa-heart",
+                        content: "Get adequate sleep (7-9 hours). Manage stress levels. Consider consulting a nutritionist for personalized advice."
+                    });
+                } 
+                else if (bmi >= 18.5 && bmi <= 24.9) {
+                    category = "Normal weight";
+                    bgColor = "bg-green-100 text-green-800";
+                    status = `Your BMI is ${bmi}, which is within the healthy weight range.`;
+                    weightToGoal = "0";
+                    goal = "maintain";
+                    
+                    recommendations.push({
+                        title: "Nutrition Plan",
+                        icon: "fa-utensils",
+                        content: "Maintain balanced diet with lean proteins, whole grains, fruits, and vegetables. Stay hydrated. Limit processed foods and added sugars."
+                    });
+                    
+                    recommendations.push({
+                        title: "Workout Plan",
+                        icon: "fa-dumbbell",
+                        content: "Mix of strength training (3 times/week) and cardio (150 mins/week). Include flexibility and mobility work. Vary your routine to prevent plateaus."
+                    });
+                    
+                    recommendations.push({
+                        title: "Maintenance Tips",
+                        icon: "fa-heart",
+                        content: "Monitor your weight monthly. Stay active throughout the day. Get regular health check-ups. Focus on body composition rather than just weight."
+                    });
+                } 
+                else if (bmi >= 25 && bmi <= 29.9) {
+                    category = "Overweight";
+                    bgColor = "bg-yellow-100 text-yellow-800";
+                    status = `Your BMI is ${bmi}, which is above the healthy weight range.`;
+                    weightToGoal = (weight - idealWeight * 1.1).toFixed(1);
+                    goal = "lose";
+                    
+                    recommendations.push({
+                        title: "Nutrition Plan",
+                        icon: "fa-utensils",
+                        content: "Moderate calorie deficit (300-500 kcal/day). Focus on high-protein, high-fiber foods. Reduce refined carbs and sugary drinks. Practice portion control."
+                    });
+                    
+                    recommendations.push({
+                        title: "Workout Plan",
+                        icon: "fa-dumbbell",
+                        content: "Cardio 4-5 times per week (30-60 mins). Strength training 2-3 times per week to preserve muscle. Include HIIT for efficient fat burning."
+                    });
+                    
+                    recommendations.push({
+                        title: "Weight Loss Tips",
+                        icon: "fa-heart",
+                        content: "Set realistic goals (0.5-1 kg/week). Track your food intake. Get support from a trainer or group. Focus on sustainable changes."
+                    });
+                } 
+                else {
+                    category = "Obesity";
+                    bgColor = "bg-red-100 text-red-800";
+                    status = `Your BMI is ${bmi}, which is significantly above the healthy weight range.`;
+                    weightToGoal = (weight - idealWeight * 1.1).toFixed(1);
+                    goal = "lose";
+                    
+                    recommendations.push({
+                        title: "Nutrition Plan",
+                        icon: "fa-utensils",
+                        content: "Consult a dietitian for personalized plan. Focus on whole, unprocessed foods. Create sustainable calorie deficit. Consider intermittent fasting under guidance."
+                    });
+                    
+                    recommendations.push({
+                        title: "Workout Plan",
+                        icon: "fa-dumbbell",
+                        content: "Start with low-impact cardio (walking, swimming). Gradually increase activity. Include strength training to preserve muscle. Consider working with a trainer."
+                    });
+                    
+                    recommendations.push({
+                        title: "Health Advice",
+                        icon: "fa-heart",
+                        content: "Consult your doctor before starting exercise. Address underlying health issues. Set small, achievable goals. Focus on long-term health improvements."
+                    });
+                }
+                
+                categoryElement.textContent = category;
+                categoryElement.className = `text-center py-2 px-4 rounded-md font-bold mb-6 ${bgColor}`;
+                statusElement.textContent = status;
+                idealWeightElement.textContent = `${idealWeightMin} - ${idealWeightMax} kg`;
+                weightToGoalElement.textContent = `${weightToGoal} kg`;
+                weightToGoalElement.parentElement.querySelector('.text-sm').textContent = 
+                    goal === 'gain' ? 'Weight To Gain' : goal === 'lose' ? 'Weight To Lose' : 'Weight To Maintain';
+                
+                // Add recommendations
+                recommendationsElement.innerHTML = '';
+                recommendations.forEach(rec => {
+                    const div = document.createElement('div');
+                    div.className = 'bg-white p-4 rounded-lg shadow-sm';
+                    div.innerHTML = `
+                        <div class="flex items-start">
+                            <div class="bg-red-100 w-10 h-10 rounded-full flex items-center justify-center mr-4">
+                                <i class="fas ${rec.icon} text-red-600"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold mb-1">${rec.title}</h4>
+                                <p class="text-gray-700 text-sm">${rec.content}</p>
+                            </div>
+                        </div>
+                    `;
+                    recommendationsElement.appendChild(div);
+                });
+                
+                // Show results
+                resultElement.classList.add('active');
+            }
+        });
+
+        // Mobile menu toggle
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+
+        if (mobileMenuBtn && mobileMenu) {
+            mobileMenuBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+        }
+    </script>
+</body>
+</html>

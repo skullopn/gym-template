@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workouts - PowerFit Gym</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Custom styles */
+        .workout-card {
+            transition: all 0.3s ease;
+            transform: translateY(0);
+        }
+        .workout-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        .muscle-tag {
+            transition: all 0.2s ease;
+        }
+        .workout-card:hover .muscle-tag {
+            background-color: #ef4444;
+            color: white;
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-container {
+            background: white;
+            border-radius: 0.5rem;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+        .modal-overlay.active .modal-container {
+            transform: translateY(0);
+        }
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+        }
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .search-bar {
+            transition: all 0.3s ease;
+        }
+        .search-bar:focus {
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.3);
+        }
+        /* Custom scrollbar */
+        .modal-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        .modal-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 0 0.5rem 0.5rem 0;
+        }
+        .modal-container::-webkit-scrollbar-thumb {
+            background: #ef4444;
+            border-radius: 4px;
+        }
+        .modal-container::-webkit-scrollbar-thumb:hover {
+            background: #dc2626;
+        }
+        /* Tab styling */
+        .tab-button {
+            transition: all 0.3s ease;
+        }
+        .tab-button.active {
+            background-color: #ef4444;
+            color: white;
+        }
+    </style>
+</head>
+<body class="font-sans bg-gray-100">
+    <!-- Navigation -->
+    <nav class="bg-gray-900 text-white shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-dumbbell text-2xl text-red-500"></i>
+                <a href="index.html" class="text-xl font-bold">PowerFit</a>
+            </div>
+            <div class="hidden md:flex space-x-6">
+                <a href="index.html" class="hover:text-red-500">Home</a>
+                <a href="about.html" class="hover:text-red-500">About</a>
+                <a href="workout.html" class="hover:text-red-500 font-medium">Workouts</a>
+                <a href="supplements.html" class="hover:text-red-500">Supplements</a>
+                <a href="diet.html" class="hover:text-red-500">Diet</a>
+                <a href="booking.html" class="hover:text-red-500">Booking</a>
+                <a href="bmi.html" class="hover:text-red-500">BMI Calculator</a>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button id="loginBtn" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-md font-medium transition">Login</button>
+                <button class="md:hidden" id="mobileMenuBtn">
+                    <i class="fas fa-bars text-2xl"></i>
+                </button>
+            </div>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobileMenu" class="md:hidden hidden bg-gray-800 px-4 py-2">
+            <a href="index.html" class="block py-2 hover:text-red-500">Home</a>
+            <a href="about.html" class="block py-2 hover:text-red-500">About</a>
+            <a href="workout.html" class="block py-2 hover:text-red-500 font-medium">Workouts</a>
+            <a href="supplements.html" class="block py-2 hover:text-red-500">Supplements</a>
+            <a href="diet.html" class="block py-2 hover:text-red-500">Diet</a>
+            <a href="booking.html" class="block py-2 hover:text-red-500">Booking</a>
+            <a href="bmi.html" class="block py-2 hover:text-red-500">BMI Calculator</a>
+        </div>
+    </nav>
+
+    <!-- Workout Hero -->
+    <section class="bg-gray-900 text-white py-20 md:py-32">
+        <div class="container mx-auto px-4 text-center">
+            <h1 class="text-4xl md:text-6xl font-bold mb-6">WORKOUT <span class="text-red-500">PROGRAMS</span></h1>
+            <p class="text-xl max-w-2xl mx-auto">Customized workout plans for all fitness levels and goals</p>
+        </div>
+    </section>
+
+    <!-- Workout Search and Filter -->
+    <section class="py-12 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="mb-8">
+                <div class="relative max-w-2xl mx-auto">
+                    <input type="text" id="workoutSearch" placeholder="Search workouts..." class="search-bar w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 pl-12">
+                    <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                </div>
+            </div>
+            
+            <div class="flex overflow-x-auto pb-2 mb-6 scrollbar-hide">
+                <div class="flex space-x-2">
+                    <button onclick="filterWorkouts('all')" class="tab-button active px-4 py-2 rounded-full bg-gray-200 text-gray-800 font-medium whitespace-nowrap">All Workouts</button>
+                    <button onclick="filterWorkouts('chest')" class="tab-button px-4 py-2 rounded-full bg-gray-200 text-gray-800 font-medium whitespace-nowrap">Chest</button>
+                    <button onclick="filterWorkouts('back')" class="tab-button px-4 py-2 rounded-full bg-gray-200 text-gray-800 font-medium whitespace-nowrap">Back</button>
+                    <button onclick="filterWorkouts('shoulders')" class="tab-button px-4 py-2 rounded-full bg-gray-200 text-gray-800 font-medium whitespace-nowrap">Shoulders</button>
+                    <button onclick="filterWorkouts('arms')" class="tab-button px-4 py-2 rounded-full bg-gray-200 text-gray-800 font-medium whitespace-nowrap">Arms</button>
+                    <button onclick="filterWorkouts('legs')" class="tab-button px-4 py-2 rounded-full bg-gray-200 text-gray-800 font-medium whitespace-nowrap">Legs</button>
+                    <button onclick="filterWorkouts('core')" class="tab-button px-4 py-2 rounded-full bg-gray-200 text-gray-800 font-medium whitespace-nowrap">Core</button>
+                    <button onclick="filterWorkouts('cardio')" class="tab-button px-4 py-2 rounded-full bg-gray-200 text-gray-800 font-medium whitespace-nowrap">Cardio</button>
+                </div>
+            </div>
+            
+            <div id="workoutContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Workouts will be loaded here by JavaScript -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Workout Detail Modal -->
+    <div id="workoutModal" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-content p-6">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h2 id="workoutTitle" class="text-2xl font-bold"></h2>
+                        <div id="workoutMuscles" class="flex flex-wrap gap-2 mt-2"></div>
+                    </div>
+                    <button onclick="closeWorkoutModal()" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <div class="video-container mb-4 rounded-lg overflow-hidden">
+                            <iframe id="workoutVideo" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                        </div>
+                        <img id="workoutImage" src="" alt="" class="w-full h-auto rounded-lg hidden">
+                    </div>
+                    <div>
+                        <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                            <h3 class="font-bold mb-2">How To Perform:</h3>
+                            <p id="workoutInstructions" class="text-gray-700"></p>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div class="bg-gray-50 p-3 rounded-lg">
+                                <h4 class="font-bold text-sm text-gray-500">DIFFICULTY</h4>
+                                <p id="workoutDifficulty" class="text-lg font-bold"></p>
+                            </div>
+                            <div class="bg-gray-50 p-3 rounded-lg">
+                                <h4 class="font-bold text-sm text-gray-500">EQUIPMENT</h4>
+                                <p id="workoutEquipment" class="text-lg font-bold"></p>
+                            </div>
+                            <div class="bg-gray-50 p-3 rounded-lg">
+                                <h4 class="font-bold text-sm text-gray-500">SETS</h4>
+                                <p id="workoutSets" class="text-lg font-bold"></p>
+                            </div>
+                            <div class="bg-gray-50 p-3 rounded-lg">
+                                <h4 class="font-bold text-sm text-gray-500">REPS/TIME</h4>
+                                <p id="workoutReps" class="text-lg font-bold"></p>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h3 class="font-bold mb-2">Target Muscles:</h3>
+                            <p id="workoutMusclesDetail" class="text-gray-700"></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-red-50 border border-red-200 p-4 rounded-lg">
+                    <h3 class="font-bold text-red-700 mb-2">Safety Tips:</h3>
+                    <ul id="workoutTips" class="list-disc list-inside text-red-700 space-y-1"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <div>
+                    <div class="flex items-center space-x-2 mb-4">
+                        <i class="fas fa-dumbbell text-2xl text-red-500"></i>
+                        <span class="text-xl font-bold">PowerFit</span>
+                    </div>
+                    <p class="text-gray-400">Your premier destination for fitness and wellness. We're committed to helping you achieve your health goals in a supportive environment.</p>
+                </div>
+                <div>
+                    <h4 class="text-lg font-bold mb-4">Quick Links</h4>
+                    <ul class="space-y-2">
+                        <li><a href="index.html" class="text-gray-400 hover:text-red-500 transition">Home</a></li>
+                        <li><a href="about.html" class="text-gray-400 hover:text-red-500 transition">About Us</a></li>
+                        <li><a href="workout.html" class="text-gray-400 hover:text-red-500 transition">Workouts</a></li>
+                        <li><a href="supplements.html" class="text-gray-400 hover:text-red-500 transition">Supplements</a></li>
+                        <li><a href="diet.html" class="text-gray-400 hover:text-red-500 transition">Diet Plans</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-bold mb-4">Services</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-red-500 transition">Personal Training</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-red-500 transition">Group Classes</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-red-500 transition">Nutrition Counseling</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-red-500 transition">Body Composition Analysis</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-red-500 transition">Recovery Services</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-bold mb-4">Contact Us</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li class="flex items-start">
+                            <i class="fas fa-map-marker-alt mt-1 mr-2 text-red-500"></i>
+                            <span>123 Fitness Street, Gym City, 10001</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-phone-alt mt-1 mr-2 text-red-500"></i>
+                            <span>(555) 123-4567</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-envelope mt-1 mr-2 text-red-500"></i>
+                            <span>info@powerfitgym.com</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center">
+                <p class="text-gray-400 mb-4 md:mb-0">© 2023 PowerFit Gym. All rights reserved.</p>
+                <div class="flex space-x-6">
+                    <a href="#" class="text-gray-400 hover:text-red-500 transition">Privacy Policy</a>
+                    <a href="#" class="text-gray-400 hover:text-red-500 transition">Terms of Service</a>
+                    <a href="#" class="text-gray-400 hover:text-red-500 transition">Sitemap</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Workout data
+        const workouts = [
+            {
+                id: 1,
+                name: "Bench Press",
+                muscles: ["chest", "shoulders", "triceps"],
+                difficulty: "Intermediate",
+                equipment: "Barbell, Bench",
+                sets: "3-4",
+                reps: "8-12 reps",
+                image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+                video: "https://www.youtube.com/embed/4Y2ZdHCOXok",
+                instructions: "Lie on a flat bench with your eyes under the bar. Grip the bar with hands slightly wider than shoulder-width. Arch your back and keep your feet flat on the floor. Unrack the bar and lower it to your mid-chest. Press the bar back up until your arms are straight.",
+                tips: [
+                    "Keep your shoulder blades pulled back and down throughout the movement",
+                    "Don't bounce the bar off your chest",
+                    "Maintain a slight arch in your lower back",
+                    "Use a spotter when lifting heavy weights"
+                ]
+            },
+            {
+                id: 2,
+                name: "Pull-Ups",
+                muscles: ["back", "biceps"],
+                difficulty: "Beginner-Advanced",
+                equipment: "Pull-Up Bar",
+                sets: "3-5",
+                reps: "As many as possible",
+                image: "https://images.unsplash.com/photo-1534258936925-c58bed479fcb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1631&q=80",
+                video: "https://www.youtube.com/embed/eGo4IYlbE5g",
+                instructions: "Grab the pull-up bar with your palms facing away from you and hands shoulder-width apart. Hang with your arms fully extended. Pull yourself up by driving your elbows down to the floor. Get your chin over the bar. Lower yourself back down with control.",
+                tips: [
+                    "Avoid swinging or using momentum",
+                    "Engage your core throughout the movement",
+                    "Focus on squeezing your shoulder blades together",
+                    "Start with assisted variations if needed"
+                ]
+            },
+            {
+                id: 3,
+                name: "Overhead Press",
+                muscles: ["shoulders", "triceps"],
+                difficulty: "Intermediate",
+                equipment: "Barbell or Dumbbells",
+                sets: "3-4",
+                reps: "6-10 reps",
+                image: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+                video: "https://www.youtube.com/embed/2yjwXTZQDDI",
+                instructions: "Stand with feet shoulder-width apart. Hold the barbell at shoulder height with hands slightly wider than shoulder-width. Press the bar overhead until your arms are fully extended. Lower the bar back to shoulder height with control.",
+                tips: [
+                    "Keep your core tight throughout the movement",
+                    "Don't arch your back excessively",
+                    "Press the bar straight up, not forward",
+                    "Start with lighter weights to perfect form"
+                ]
+            },
+            {
+                id: 4,
+                name: "Squats",
+                muscles: ["legs", "glutes", "core"],
+                difficulty: "Beginner-Advanced",
+                equipment: "Barbell (optional)",
+                sets: "3-5",
+                reps: "8-12 reps",
+                image: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1520&q=80",
+                video: "https://www.youtube.com/embed/bEv6CCg2BC8",
+                instructions: "Stand with feet shoulder-width apart or slightly wider. Keep your chest up and core engaged. Bend at your knees and hips to lower your body. Go down until your thighs are at least parallel to the floor. Drive through your heels to stand back up.",
+                tips: [
+                    "Keep your knees in line with your toes",
+                    "Maintain a neutral spine throughout",
+                    "Don't let your knees cave inward",
+                    "Start with bodyweight to perfect form"
+                ]
+            },
+            {
+                id: 5,
+                name: "Deadlifts",
+                muscles: ["back", "legs", "glutes"],
+                difficulty: "Advanced",
+                equipment: "Barbell",
+                sets: "3-4",
+                reps: "5-8 reps",
+                image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+                video: "https://www.youtube.com/embed/1ZXobu7JvvE",
+                instructions: "Stand with feet hip-width apart, barbell over mid-foot. Bend at hips and knees to grip the bar. Keep your back flat and chest up. Lift the bar by extending hips and knees. Stand up straight, then lower the bar with control.",
+                tips: [
+                    "Maintain a neutral spine throughout",
+                    "Keep the bar close to your body",
+                    "Drive through your heels, not toes",
+                    "Use proper form before adding weight"
+                ]
+            },
+            {
+                id: 6,
+                name: "Bicep Curls",
+                muscles: ["biceps"],
+                difficulty: "Beginner",
+                equipment: "Dumbbells or Barbell",
+                sets: "3-4",
+                reps: "10-15 reps",
+                image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+                video: "https://www.youtube.com/embed/ykJmrZ5v0Oo",
+                instructions: "Stand with dumbbells at your sides, palms facing forward. Keep your elbows close to your torso. Curl the weights while keeping your upper arms stationary. Continue moving until your biceps are fully contracted. Slowly lower the weights back to starting position.",
+                tips: [
+                    "Avoid swinging your body",
+                    "Keep your elbows stationary",
+                    "Control the movement on the way down",
+                    "Don't use weights that are too heavy"
+                ]
+            },
+            {
+                id: 7,
+                name: "Running (Treadmill)",
+                muscles: ["legs", "cardio"],
+                difficulty: "Beginner-Advanced",
+                equipment: "Treadmill",
+                sets: "1",
+                reps: "20-60 minutes",
+                image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+                video: "https://www.youtube.com/embed/5umbfT9b0dM",
+                instructions: "Start with a 5-minute warm-up walk. Gradually increase speed to a comfortable running pace. Maintain good posture - head up, shoulders relaxed. Land mid-foot, not on your heels. Swing your arms naturally. Cool down with a 5-minute walk.",
+                tips: [
+                    "Start slow and gradually increase intensity",
+                    "Stay hydrated",
+                    "Use proper running shoes",
+                    "Listen to your body and don't overdo it"
+                ]
+            },
+            {
+                id: 8,
+                name: "Plank",
+                muscles: ["core"],
+                difficulty: "Beginner-Advanced",
+                equipment: "None",
+                sets: "3-5",
+                reps: "30-120 seconds",
+                image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+                video: "https://www.youtube.com/embed/pSHjTRCQxIw",
+                instructions: "Start in a push-up position but with your weight on your forearms. Keep your body in a straight line from head to heels. Engage your core muscles. Hold this position without letting your hips sag or rise. Breathe normally throughout.",
+                tips: [
+                    "Don't hold your breath",
+                    "Keep your neck neutral",
+                    "Start with shorter holds and progress",
+                    "Engage your glutes to help stabilize"
+                ]
+            },
+            {
+                id: 9,
+                name: "Lat Pulldown",
+                muscles: ["back", "biceps"],
+                difficulty: "Beginner",
+                equipment: "Cable Machine",
+                sets: "3-4",
+                reps: "10-12 reps",
+                image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+                video: "https://www.youtube.com/embed/CAwf7n6Luuc",
+                instructions: "Sit at a lat pulldown machine and adjust the thigh pad. Grab the bar with a wide overhand grip. Lean back slightly and pull the bar down to your upper chest. Squeeze your shoulder blades together at the bottom. Slowly return to starting position.",
+                tips: [
+                    "Control the weight on the way up",
+                    "Don't use momentum",
+                    "Keep your chest up",
+                    "Focus on squeezing your back muscles"
+                ]
+            },
+            {
+                id: 10,
+                name: "Dumbbell Fly",
+                muscles: ["chest"],
+                difficulty: "Intermediate",
+                equipment: "Dumbbells, Bench",
+                sets: "3-4",
+                reps: "10-12 reps",
+                image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+                video: "https://www.youtube.com/embed/eozdVDA78K0",
+                instructions: "Lie on a flat bench with dumbbells held above your chest. Keep a slight bend in your elbows. Lower the weights out to your sides in an arc motion. Stop when your upper arms are parallel to the floor. Bring the weights back up in the same arc motion.",
+                tips: [
+                    "Maintain control throughout",
+                    "Don't lower weights too far",
+                    "Keep a slight bend in elbows",
+                    "Use lighter weights than bench press"
+                ]
+            },
+            {
+                id: 11,
+                name: "Leg Press",
+                muscles: ["legs", "glutes"],
+                difficulty: "Beginner",
+                equipment: "Leg Press Machine",
+                sets: "3-4",
+                reps: "10-15 reps",
+                image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+                video: "https://www.youtube.com/embed/IZxyjW7MPJQ",
+                instructions: "Sit on the leg press machine and place your feet shoulder-width apart on the platform. Release the safety handles and lower the platform by bending your knees. Lower until your knees are at about 90 degrees. Press through your heels to extend your legs.",
+                tips: [
+                    "Don't lock your knees at the top",
+                    "Keep your back flat against the pad",
+                    "Control the weight on the way down",
+                    "Don't let your knees cave inward"
+                ]
+            },
+            {
+                id: 12,
+                name: "Battle Ropes",
+                muscles: ["shoulders", "arms", "core", "cardio"],
+                difficulty: "Intermediate",
+                equipment: "Battle Ropes",
+                sets: "3-5",
+                reps: "30-60 seconds",
+                image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+                video: "https://www.youtube.com/embed/7o5hRa1yFDM",
+                instructions: "Stand with feet shoulder-width apart, knees slightly bent. Hold one rope in each hand with arms extended. Alternate whipping your arms up and down to create waves in the ropes. Keep your core engaged and maintain good posture.",
+                tips: [
+                    "Start with short intervals",
+                    "Engage your core throughout",
+                    "Keep movements controlled",
+                    "Use your whole body, not just arms"
+                ]
+            }
+        ];
+
+        // Display workouts
+        function displayWorkouts(filter = 'all') {
+            const container = document.getElementById('workoutContainer');
+            container.innerHTML = '';
+            
+            let filteredWorkouts = workouts;
+            if (filter !== 'all') {
+                filteredWorkouts = workouts.filter(workout => 
+                    workout.muscles.includes(filter)
+                );
+            }
+            
+            filteredWorkouts.forEach(workout => {
+                const workoutCard = document.createElement('div');
+                workoutCard.className = 'workout-card bg-white rounded-lg overflow-hidden shadow-lg cursor-pointer';
+                workoutCard.innerHTML = `
+                    <div onclick="showWorkoutDetail(${workout.id})">
+                        <img src="${workout.image}" alt="${workout.name}" class="w-full h-48 object-cover">
+                        <div class="p-6">
+                            <h3 class="text-xl font-bold mb-2">${workout.name}</h3>
+                            <div class="flex flex-wrap gap-2 mb-4">
+                                ${workout.muscles.map(muscle => `
+                                    <span class="muscle-tag bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded">${muscle}</span>
+                                `).join('')}
+                            </div>
+                            <div class="flex justify-between text-sm text-gray-600">
+                                <span>${workout.difficulty}</span>
+                                <span>${workout.equipment}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(workoutCard);
+            });
+        }
+
+        // Show workout detail
+        function showWorkoutDetail(id) {
+            const workout = workouts.find(w => w.id === id);
+            const modal = document.getElementById('workoutModal');
+            
+            document.getElementById('workoutTitle').textContent = workout.name;
+            document.getElementById('workoutVideo').src = workout.video;
+            document.getElementById('workoutImage').src = workout.image;
+            document.getElementById('workoutInstructions').textContent = workout.instructions;
+            document.getElementById('workoutDifficulty').textContent = workout.difficulty;
+            document.getElementById('workoutEquipment').textContent = workout.equipment;
+            document.getElementById('workoutSets').textContent = workout.sets;
+            document.getElementById('workoutReps').textContent = workout.reps;
+            
+            const musclesElement = document.getElementById('workoutMuscles');
+            musclesElement.innerHTML = '';
+            workout.muscles.forEach(muscle => {
+                const span = document.createElement('span');
+                span.className = 'bg-red-100 text-red-800 text-xs px-2 py-1 rounded';
+                span.textContent = muscle;
+                musclesElement.appendChild(span);
+            });
+            
+            document.getElementById('workoutMusclesDetail').textContent = 
+                workout.muscles.map(m => m.charAt(0).toUpperCase() + m.slice(1)).join(', ');
+            
+            const tipsElement = document.getElementById('workoutTips');
+            tipsElement.innerHTML = '';
+            workout.tips.forEach(tip => {
+                const li = document.createElement('li');
+                li.textContent = tip;
+                tipsElement.appendChild(li);
+            });
+            
+            modal.classList.add('active');
+        }
+
+        // Close workout modal
+        function closeWorkoutModal() {
+            document.getElementById('workoutModal').classList.remove('active');
+            document.getElementById('workoutVideo').src = '';
+        }
+
+        // Filter workouts
+        function filterWorkouts(filter) {
+            // Update active tab
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            displayWorkouts(filter);
+        }
+
+        // Search workouts
+        document.getElementById('workoutSearch').addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const container = document.getElementById('workoutContainer');
+            const cards = container.querySelectorAll('.workout-card');
+            
+            cards.forEach(card => {
+                const title = card.querySelector('h3').textContent.toLowerCase();
+                if (title.includes(searchTerm)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+
+        // Mobile menu toggle
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+
+        if (mobileMenuBtn && mobileMenu) {
+            mobileMenuBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+        }
+
+        // Initialize
+        displayWorkouts();
+    </script>
+</body>
+</html>

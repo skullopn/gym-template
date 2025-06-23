@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PowerFit Login</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+</head>
+<body class="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-700 via-black to-black">
+  <!-- Top Bar -->
+  <div class="absolute top-0 left-0 w-full flex items-center justify-between px-8 py-6 z-10">
+    <!-- Logo and Name -->
+    <div class="flex items-center gap-3">
+      <i class="fas fa-dumbbell text-2xl text-red-500"></i>
+      <span class="text-xl font-bold text-white tracking-wide">PowerFit</span>
+    </div>
+    <!-- X Close Button -->
+    <a href="/" title="Return Home" class="text-gray-300 hover:text-red-500 text-3xl font-bold transition-all duration-200">
+      &times;
+    </a>
+  </div>
+
+  <!-- Login Card -->
+  <div class="w-full max-w-md bg-white/90 rounded-3xl shadow-2xl p-8 flex flex-col gap-6 relative overflow-hidden mt-16">
+    <div class="flex justify-center mb-2">
+      <img src="https://img.icons8.com/color/96/000000/dumbbell.png" alt="Gym Logo" class="w-16 h-16 drop-shadow-xl animate-bounce" />
+    </div>
+    <h2 class="text-3xl font-bold text-center text-gray-800 mb-2">Welcome Back!</h2>
+    <p class="text-center text-gray-500 mb-4">Sign in to your gym account</p>
+
+    <form id="loginForm" class="flex flex-col gap-4">
+      <!-- Email Field with Floating Label -->
+      <div class="relative">
+        <input id="email" name="email" type="email" required
+          class="peer w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-red-600 focus:ring-2 focus:ring-red-300 outline-none bg-white transition duration-300 placeholder-transparent"
+          placeholder="Email Address" />
+        <label for="email"
+          class="absolute left-4 top-3 text-gray-400 pointer-events-none transition-all duration-200 peer-placeholder-shown:top-3 peer-placeholder-shown:text-gray-400 peer-focus:-top-4 peer-focus:text-sm peer-focus:text-red-700 bg-white px-1">
+          Email Address
+        </label>
+      </div>
+      <!-- Password Field with Floating Label & Show/Hide -->
+      <div class="relative">
+        <input id="password" name="password" type="password" required
+          class="peer w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-red-600 focus:ring-2 focus:ring-red-300 outline-none bg-white transition duration-300 placeholder-transparent"
+          placeholder="Password" />
+        <label for="password"
+          class="absolute left-4 top-3 text-gray-400 pointer-events-none transition-all duration-200 peer-placeholder-shown:top-3 peer-placeholder-shown:text-gray-400 peer-focus:-top-4 peer-focus:text-sm peer-focus:text-red-700 bg-white px-1">
+          Password
+        </label>
+        <button type="button" onclick="togglePassword()" class="absolute right-4 top-3 text-gray-400 hover:text-red-700 transition">
+          <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path id="eyeOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0zm-9 0a9 9 0 0118 0 9 9 0 01-18 0z" />
+            <path id="eyeClosed" style="display:none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3l18 18M9.88 9.88A3 3 0 0012 15a3 3 0 002.12-.88m2.83-2.83A9 9 0 013 12m1.41-4.59A9 9 0 0121 12m-6.41 4.59A9 9 0 013 12" />
+          </svg>
+        </button>
+      </div>
+      <!-- Remember Me and Forgot Password -->
+      <div class="flex items-center justify-between">
+        <label class="flex items-center gap-2 text-gray-600">
+          <input type="checkbox" class="accent-red-600">
+          Remember me
+        </label>
+        <a href="#" class="text-red-600 hover:underline text-sm transition">Forgot password?</a>
+      </div>
+      <!-- Login Button with Gradient & Hover Effect -->
+      <button type="submit"
+        class="w-full py-3 rounded-lg bg-gradient-to-r from-red-700 via-black to-black text-white font-bold text-lg shadow-lg hover:scale-105 hover:shadow-xl transition-all duration-300">
+        Sign In
+      </button>
+    </form>
+    <!-- Divider and Social Login (optional) -->
+    <div class="flex items-center my-2">
+      <div class="flex-grow h-px bg-gray-300"></div>
+      <span class="mx-2 text-gray-400 text-sm">or</span>
+      <div class="flex-grow h-px bg-gray-300"></div>
+    </div>
+    <div class="flex gap-4 justify-center">
+      <button class="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition">
+        <i class="fab fa-google"></i>
+        Google
+      </button>
+      <button class="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-800 text-white hover:bg-blue-900 transition">
+        <i class="fab fa-facebook-f"></i>
+        Facebook
+      </button>
+    </div>
+    <!-- Sign Up Link -->
+    <p class="text-center text-gray-500 mt-4">Not a member? <a href="#" class="text-red-700 font-semibold hover:underline">Sign up now</a></p>
+  </div>
+
+  <script>
+    function togglePassword() {
+      const pwd = document.getElementById('password');
+      const eyeOpen = document.getElementById('eyeOpen');
+      const eyeClosed = document.getElementById('eyeClosed');
+      if (pwd.type === "password") {
+        pwd.type = "text";
+        eyeOpen.style.display = "none";
+        eyeClosed.style.display = "block";
+      } else {
+        pwd.type = "password";
+        eyeOpen.style.display = "block";
+        eyeClosed.style.display = "none";
+      }
+    }
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      alert('Login submitted!');
+    });
+  </script>
+</body>
+</html>
