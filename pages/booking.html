@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Membership - PowerFit Gym</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Custom styles */
+        .plan-card {
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        .plan-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border-color: #ef4444;
+        }
+        .plan-highlight {
+            border: 2px solid #ef4444;
+            position: relative;
+        }
+        .plan-highlight::before {
+            content: "MOST POPULAR";
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: #ef4444;
+            color: white;
+            font-size: 0.75rem;
+            font-weight: bold;
+            padding: 0.25rem 0.5rem;
+            border-bottom-left-radius: 0.5rem;
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-container {
+            background: white;
+            border-radius: 0.5rem;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+        .modal-overlay.active .modal-container {
+            transform: translateY(0);
+        }
+        .modal-content {
+            padding: 1.5rem;
+        }
+        .feature-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
+        }
+        .feature-icon {
+            color: #10b981;
+            margin-right: 0.5rem;
+            margin-top: 0.25rem;
+        }
+        .restriction-icon {
+            color: #ef4444;
+            margin-right: 0.5rem;
+            margin-top: 0.25rem;
+        }
+        .savings-badge {
+            background: #10b981;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: bold;
+            display: inline-block;
+            margin-left: 0.5rem;
+        }
+        /* Custom scrollbar for modal */
+        .modal-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        .modal-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 0 0.5rem 0.5rem 0;
+        }
+        .modal-container::-webkit-scrollbar-thumb {
+            background: #ef4444;
+            border-radius: 4px;
+        }
+        .modal-container::-webkit-scrollbar-thumb:hover {
+            background: #dc2626;
+        }
+        /* FAQ animations */
+        .faq-item {
+            transition: all 0.3s ease;
+        }
+        .faq-item:hover {
+            transform: translateX(5px);
+        }
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        .faq-answer.active {
+            max-height: 500px;
+        }
+        .faq-chevron {
+            transition: transform 0.3s ease;
+        }
+        .faq-item.active .faq-chevron {
+            transform: rotate(180deg);
+        }
+    </style>
+</head>
+<body class="font-sans bg-gray-100">
+    <!-- Navigation -->
+    <nav class="bg-gray-900 text-white shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-dumbbell text-2xl text-red-500"></i>
+                <a href="../index.html" class="text-xl font-bold">PowerFit</a>
+            </div>
+            <div class="hidden md:flex space-x-6">
+                <a href="../index.html" class="hover:text-red-500">Home</a>
+                <a href="../about.html" class="hover:text-red-500">About</a>
+                <a href="../workout.html" class="hover:text-red-500">Workouts</a>
+                <a href="supplements.html" class="hover:text-red-500">Supplements</a>
+                <a href="diet.html" class="hover:text-red-500">Diet</a>
+                <a href="booking.html" class="hover:text-red-500 font-medium">Booking</a>
+                <a href="bmi.html" class="hover:text-red-500">BMI Calculator</a>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button id="loginBtn" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-md font-medium transition">Login</button>
+                <button class="md:hidden" id="mobileMenuBtn">
+                    <i class="fas fa-bars text-2xl"></i>
+                </button>
+            </div>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobileMenu" class="md:hidden hidden bg-gray-800 px-4 py-2">
+            <a href="index.html" class="block py-2 hover:text-red-500">Home</a>
+            <a href="about.html" class="block py-2 hover:text-red-500">About</a>
+            <a href="workout.html" class="block py-2 hover:text-red-500">Workouts</a>
+            <a href="supplements.html" class="block py-2 hover:text-red-500">Supplements</a>
+            <a href="diet.html" class="block py-2 hover:text-red-500">Diet</a>
+            <a href="booking.html" class="block py-2 hover:text-red-500 font-medium">Booking</a>
+            <a href="bmi.html" class="block py-2 hover:text-red-500">BMI Calculator</a>
+        </div>
+    </nav>
+
+    <!-- Booking Hero -->
+    <section class="bg-gray-900 text-white py-20 md:py-32">
+        <div class="container mx-auto px-4 text-center">
+            <h1 class="text-4xl md:text-6xl font-bold mb-6">MEMBERSHIP <span class="text-red-500">PLANS</span></h1>
+            <p class="text-xl max-w-2xl mx-auto">Choose the membership that fits your goals and start your fitness journey with us.</p>
+        </div>
+    </section>
+
+    <!-- Membership Plans -->
+    <section class="py-12 md:py-20 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+                <!-- Monthly Plan -->
+                <div class="plan-card bg-white rounded-lg overflow-hidden shadow-lg">
+                    <div class="bg-gray-800 text-white p-6 text-center">
+                        <h3 class="text-xl font-bold">MONTHLY</h3>
+                        <div class="my-4">
+                            <span class="text-4xl font-bold">₹1,500</span>
+                            <span class="text-gray-400">/month</span>
+                        </div>
+                        <p class="text-sm text-gray-300">Pay as you go</p>
+                    </div>
+                    <div class="p-6">
+                        <ul class="space-y-3 mb-6">
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                                <span>Full gym access</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                                <span>Basic equipment</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-times text-gray-400 mt-1 mr-2"></i>
+                                <span class="text-gray-500">No group classes</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-times text-gray-400 mt-1 mr-2"></i>
+                                <span class="text-gray-500">No personal training</span>
+                            </li>
+                        </ul>
+                        <button onclick="showPlanDetails('monthly')" class="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-md font-medium transition">Choose Plan</button>
+                    </div>
+                </div>
+                
+                <!-- Quarterly Plan -->
+                <div class="plan-card bg-white rounded-lg overflow-hidden shadow-lg">
+                    <div class="bg-gray-800 text-white p-6 text-center">
+                        <h3 class="text-xl font-bold">QUARTERLY</h3>
+                        <div class="my-4">
+                            <span class="text-4xl font-bold">₹7,500</span>
+                            <span class="text-gray-400">/3 months</span>
+                        </div>
+                        <p class="text-sm text-gray-300">Save ₹1,500 (17% off)</p>
+                    </div>
+                    <div class="p-6">
+                        <ul class="space-y-3 mb-6">
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                                <span>Full gym access</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                                <span>All equipment</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                                <span>2 group classes/week</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-times text-gray-400 mt-1 mr-2"></i>
+                                <span class="text-gray-500">No personal training</span>
+                            </li>
+                        </ul>
+                        <button onclick="showPlanDetails('quarterly')" class="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-md font-medium transition">Choose Plan</button>
+                    </div>
+                </div>
+                
+                <!-- Yearly Plan -->
+                <div class="plan-card plan-highlight bg-white rounded-lg overflow-hidden shadow-lg">
+                    <div class="bg-red-500 text-white p-6 text-center">
+                        <h3 class="text-xl font-bold">YEARLY</h3>
+                        <div class="my-4">
+                            <span class="text-4xl font-bold">₹12,000</span>
+                            <span class="text-gray-200">/year</span>
+                        </div>
+                        <p class="text-sm text-gray-200">Save ₹6,000 (33% off)</p>
+                    </div>
+                    <div class="p-6">
+                        <ul class="space-y-3 mb-6">
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                                <span>24/7 gym access</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                                <span>All equipment</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                                <span>Unlimited group classes</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                                <span>2 personal training sessions</span>
+                            </li>
+                        </ul>
+                        <button onclick="showPlanDetails('yearly')" class="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-md font-medium transition">Choose Plan</button>
+                    </div>
+                </div>
+                
+                <!-- 2-Year Plan -->
+                <div class="plan-card bg-white rounded-lg overflow-hidden shadow-lg">
+                    <div class="bg-gray-800 text-white p-6 text-center">
+                        <h3 class="text-xl font-bold">2-YEAR</h3>
+                        <div class="my-4">
+                            <span class="text-4xl font-bold">₹22,000</span>
+                            <span class="text-gray-400">/2 years</span>
+                        </div>
+                        <p class="text-sm text-gray-300">Save ₹14,000 (39% off)</p>
+                    </div>
+                    <div class="p-6">
+                        <ul class="space-y-3 mb-6">
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                                <span>24/7 gym access</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                                <span>All equipment</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                                <span>Unlimited group classes</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                                <span>5 personal training sessions</span>
+                            </li>
+                        </ul>
+                        <button onclick="showPlanDetails('two-year')" class="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-md font-medium transition">Choose Plan</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Plan Details Modal -->
+            <div id="planDetailsModal" class="modal-overlay">
+                <div class="modal-container">
+                    <div class="modal-content">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 id="planTitle" class="text-2xl font-bold">Plan Details</h2>
+                            <button onclick="closePlanDetails()" class="text-gray-500 hover:text-gray-700">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div id="planDetailsContent" class="mb-6">
+                            <!-- Content will be filled by JavaScript -->
+                        </div>
+                        <div class="border-t border-gray-200 pt-4">
+                            <h3 class="text-lg font-bold mb-3">Purchase Plan</h3>
+                            <form id="purchaseForm" class="space-y-4">
+                                <div>
+                                    <label for="fullName" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                                    <input type="text" id="fullName" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500">
+                                </div>
+                                <div>
+                                    <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                                    <input type="email" id="email" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500">
+                                </div>
+                                <div>
+                                    <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                                    <input type="tel" id="phone" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500">
+                                </div>
+                                <div>
+                                    <label for="paymentMethod" class="block text-sm font-medium text-gray-700 mb-1">Payment Method</label>
+                                    <select id="paymentMethod" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500">
+                                        <option value="">Select payment method</option>
+                                        <option value="credit_card">Credit Card</option>
+                                        <option value="debit_card">Debit Card</option>
+                                        <option value="upi">UPI</option>
+                                        <option value="net_banking">Net Banking</option>
+                                    </select>
+                                </div>
+                                <div class="flex items-start">
+                                    <input id="agreeTerms" name="agreeTerms" type="checkbox" required class="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded mt-1">
+                                    <label for="agreeTerms" class="ml-2 block text-sm text-gray-900">I agree to the <a href="#" class="text-red-600 hover:underline">terms and conditions</a></label>
+                                </div>
+                                <div>
+                                    <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-md font-medium transition flex items-center justify-center">
+                                        <i class="fas fa-lock mr-2"></i> Complete Purchase
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Free Trial Form -->
+            <div class="bg-gradient-to-r from-red-600 to-red-800 text-white rounded-lg p-8 max-w-4xl mx-auto shadow-lg">
+                <h3 class="text-2xl font-bold text-center mb-6">TRY US RISK-FREE WITH A 7-DAY TRIAL</h3>
+                <form class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <label for="name" class="block text-sm font-medium text-white mb-1">Full Name</label>
+                        <input type="text" id="name" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-white">
+                    </div>
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-white mb-1">Email</label>
+                        <input type="email" id="email" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-white">
+                    </div>
+                    <div class="md:col-span-1">
+                        <label for="phone" class="block text-sm font-medium text-white mb-1">Phone</label>
+                        <input type="tel" id="phone" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-white">
+                    </div>
+                    <div class="md:col-span-3 text-center">
+                        <button type="submit" class="bg-white hover:bg-gray-100 text-red-600 px-8 py-3 rounded-md font-bold text-lg transition">
+                            Claim Your Free Trial
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="py-12 md:py-20 bg-gray-100">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-12">FREQUENTLY <span class="text-red-500">ASKED QUESTIONS</span></h2>
+            
+            <div class="max-w-3xl mx-auto space-y-4">
+                <div class="faq-item bg-white p-6 rounded-lg shadow-md cursor-pointer" onclick="toggleFAQ(1)">
+                    <h3 class="text-lg font-bold mb-2 flex justify-between items-center">
+                        <span>What payment methods do you accept?</span>
+                        <i class="faq-chevron fas fa-chevron-down"></i>
+                    </h3>
+                    <div id="faq1" class="faq-answer text-gray-600">
+                        <p class="mt-2">We accept all major credit/debit cards (Visa, Mastercard, American Express), UPI payments (Google Pay, PhonePe, Paytm), net banking, and cash payments at our facility. All online transactions are secured with 256-bit SSL encryption.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item bg-white p-6 rounded-lg shadow-md cursor-pointer" onclick="toggleFAQ(2)">
+                    <h3 class="text-lg font-bold mb-2 flex justify-between items-center">
+                        <span>Can I freeze my membership?</span>
+                        <i class="faq-chevron fas fa-chevron-down"></i>
+                    </h3>
+                    <div id="faq2" class="faq-answer text-gray-600">
+                        <p class="mt-2">Yes, you can freeze your membership for medical reasons or travel for up to 3 months per year. A small administrative fee of ₹500 per month applies. Freeze requests require 7 days notice and documentation may be required for medical freezes.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item bg-white p-6 rounded-lg shadow-md cursor-pointer" onclick="toggleFAQ(3)">
+                    <h3 class="text-lg font-bold mb-2 flex justify-between items-center">
+                        <span>What's your cancellation policy?</span>
+                        <i class="faq-chevron fas fa-chevron-down"></i>
+                    </h3>
+                    <div id="faq3" class="faq-answer text-gray-600">
+                        <p class="mt-2">Monthly plans can be canceled anytime with 15 days notice. Annual plans require 30 days notice for cancellation and may be subject to an early termination fee of 10% of remaining balance. 2-year plans have a 3-month notice period with a 15% early termination fee.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item bg-white p-6 rounded-lg shadow-md cursor-pointer" onclick="toggleFAQ(4)">
+                    <h3 class="text-lg font-bold mb-2 flex justify-between items-center">
+                        <span>Do you offer corporate memberships?</span>
+                        <i class="faq-chevron fas fa-chevron-down"></i>
+                    </h3>
+                    <div id="faq4" class="faq-answer text-gray-600">
+                        <p class="mt-2">Yes, we offer special corporate rates for companies with 5+ employees. Benefits include 10-25% discounts depending on group size, flexible billing options, dedicated account managers, and customized wellness programs. Contact our corporate sales team at corporate@powerfit.com for more information.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <div>
+                    <div class="flex items-center space-x-2 mb-4">
+                        <i class="fas fa-dumbbell text-2xl text-red-500"></i>
+                        <span class="text-xl font-bold">PowerFit</span>
+                    </div>
+                    <p class="text-gray-400">Your premier destination for fitness and wellness. We're committed to helping you achieve your health goals in a supportive environment.</p>
+                </div>
+                <div>
+                    <h4 class="text-lg font-bold mb-4">Quick Links</h4>
+                    <ul class="space-y-2">
+                        <li><a href="index.html" class="text-gray-400 hover:text-red-500 transition">Home</a></li>
+                        <li><a href="about.html" class="text-gray-400 hover:text-red-500 transition">About Us</a></li>
+                        <li><a href="workout.html" class="text-gray-400 hover:text-red-500 transition">Workouts</a></li>
+                        <li><a href="supplements.html" class="text-gray-400 hover:text-red-500 transition">Supplements</a></li>
+                        <li><a href="diet.html" class="text-gray-400 hover:text-red-500 transition">Diet Plans</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-bold mb-4">Services</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-red-500 transition">Personal Training</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-red-500 transition">Group Classes</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-red-500 transition">Nutrition Counseling</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-red-500 transition">Body Composition Analysis</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-red-500 transition">Recovery Services</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-bold mb-4">Contact Us</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li class="flex items-start">
+                            <i class="fas fa-map-marker-alt mt-1 mr-2 text-red-500"></i>
+                            <span>123 Fitness Street, Gym City, 10001</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-phone-alt mt-1 mr-2 text-red-500"></i>
+                            <span>(555) 123-4567</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-envelope mt-1 mr-2 text-red-500"></i>
+                            <span>info@powerfitgym.com</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center">
+                <p class="text-gray-400 mb-4 md:mb-0">© 2023 PowerFit Gym. All rights reserved.</p>
+                <div class="flex space-x-6">
+                    <a href="#" class="text-gray-400 hover:text-red-500 transition">Privacy Policy</a>
+                    <a href="#" class="text-gray-400 hover:text-red-500 transition">Terms of Service</a>
+                    <a href="#" class="text-gray-400 hover:text-red-500 transition">Sitemap</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Plan details data
+        const plans = {
+            'monthly': {
+                title: 'Monthly Membership',
+                price: '₹1,500',
+                duration: '1 month',
+                savings: '',
+                startDate: new Date(),
+                endDate: function() {
+                    let date = new Date(this.startDate);
+                    date.setMonth(date.getMonth() + 1);
+                    return date;
+                },
+                features: [
+                    'Full gym access during operating hours',
+                    'Use of basic equipment and machines',
+                    'Locker room access',
+                    'Free Wi-Fi',
+                    'No long-term commitment'
+                ],
+                restrictions: [
+                    'No access to group classes',
+                    'No personal training sessions included',
+                    'Peak hour restrictions may apply'
+                ]
+            },
+            'quarterly': {
+                title: 'Quarterly Membership',
+                price: '₹7,500',
+                duration: '3 months',
+                savings: 'Save ₹1,500 compared to monthly',
+                startDate: new Date(),
+                endDate: function() {
+                    let date = new Date(this.startDate);
+                    date.setMonth(date.getMonth() + 3);
+                    return date;
+                },
+                features: [
+                    'Full gym access during operating hours',
+                    'Use of all equipment and machines',
+                    '2 group classes per week',
+                    'Locker room access',
+                    'Free Wi-Fi',
+                    '10% discount on supplements'
+                ],
+                restrictions: [
+                    'No personal training sessions included',
+                    'Peak hour restrictions may apply'
+                ]
+            },
+            'yearly': {
+                title: 'Yearly Membership',
+                price: '₹12,000',
+                duration: '12 months',
+                savings: 'Save ₹6,000 compared to monthly',
+                startDate: new Date(),
+                endDate: function() {
+                    let date = new Date(this.startDate);
+                    date.setFullYear(date.getFullYear() + 1);
+                    return date;
+                },
+                features: [
+                    '24/7 gym access',
+                    'Use of all equipment and machines',
+                    'Unlimited group classes',
+                    '2 personal training sessions',
+                    'Locker room with secure storage',
+                    'Free Wi-Fi',
+                    '15% discount on supplements',
+                    'Free body composition analysis every quarter'
+                ],
+                restrictions: [
+                    '1-month notice period for cancellation'
+                ]
+            },
+            'two-year': {
+                title: '2-Year Membership',
+                price: '₹22,000',
+                duration: '24 months',
+                savings: 'Save ₹14,000 compared to monthly',
+                startDate: new Date(),
+                endDate: function() {
+                    let date = new Date(this.startDate);
+                    date.setFullYear(date.getFullYear() + 2);
+                    return date;
+                },
+                features: [
+                    '24/7 gym access',
+                    'Use of all equipment and machines',
+                    'Unlimited group classes',
+                    '5 personal training sessions',
+                    'Locker room with secure storage',
+                    'Free Wi-Fi',
+                    '20% discount on supplements',
+                    'Free body composition analysis every quarter',
+                    'Free PowerFit gym bag',
+                    'Priority booking for classes'
+                ],
+                restrictions: [
+                    '3-month notice period for cancellation'
+                ]
+            }
+        };
+
+        // Show plan details
+        function showPlanDetails(planType) {
+            const plan = plans[planType];
+            const modal = document.getElementById('planDetailsModal');
+            const title = document.getElementById('planTitle');
+            const content = document.getElementById('planDetailsContent');
+            
+            // Format dates
+            const startDate = plan.startDate.toLocaleDateString('en-IN');
+            const endDate = plan.endDate().toLocaleDateString('en-IN');
+            
+            // Build content HTML
+            let html = `
+                <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="font-medium text-lg">${plan.price}</span>
+                        <span class="text-gray-600">${plan.duration}</span>
+                    </div>
+                    ${plan.savings ? `<div class="text-green-600 font-medium text-sm">
+                        ${plan.savings}
+                    </div>` : ''}
+                </div>
+                
+                <div class="mb-4">
+                    <div class="flex justify-between mb-2">
+                        <span class="font-medium">Start Date:</span>
+                        <span>${startDate}</span>
+                    </div>
+                    <div class="flex justify-between mb-4">
+                        <span class="font-medium">End Date:</span>
+                        <span>${endDate}</span>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <h4 class="font-bold mb-2 text-lg">Plan Features:</h4>
+                    <ul class="space-y-2 text-gray-700">
+                        ${plan.features.map(feature => `
+                        <li class="feature-item">
+                            <i class="feature-icon fas fa-check-circle"></i>
+                            <span>${feature}</span>
+                        </li>
+                        `).join('')}
+                    </ul>
+                </div>
+                
+                ${plan.restrictions.length ? `
+                <div class="mb-4">
+                    <h4 class="font-bold mb-2 text-lg">Plan Restrictions:</h4>
+                    <ul class="space-y-2 text-gray-700">
+                        ${plan.restrictions.map(restriction => `
+                        <li class="feature-item">
+                            <i class="restriction-icon fas fa-exclamation-circle"></i>
+                            <span>${restriction}</span>
+                        </li>
+                        `).join('')}
+                    </ul>
+                </div>
+                ` : ''}
+            `;
+            
+            title.textContent = plan.title;
+            content.innerHTML = html;
+            modal.classList.add('active');
+            
+            // Scroll to top of modal
+            document.querySelector('.modal-container').scrollTop = 0;
+        }
+
+        // Close plan details
+        function closePlanDetails() {
+            document.getElementById('planDetailsModal').classList.remove('active');
+        }
+
+        // Handle purchase form submission
+        document.getElementById('purchaseForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form values
+            const name = document.getElementById('fullName').value;
+            const plan = document.getElementById('planTitle').textContent;
+            
+            // Here you would typically send the data to your backend
+            alert(`Thank you, ${name}! Your ${plan} purchase was successful.`);
+            
+            // Reset form and close modal
+            this.reset();
+            closePlanDetails();
+        });
+
+        // Toggle FAQ items
+        function toggleFAQ(num) {
+            const faq = document.getElementById(`faq${num}`);
+            const chevron = document.querySelector(`#faq${num}`).previousElementSibling.querySelector('.faq-chevron');
+            const item = document.querySelector(`#faq${num}`).parentElement;
+            
+            faq.classList.toggle('active');
+            item.classList.toggle('active');
+            chevron.classList.toggle('rotate-180');
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('planDetailsModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closePlanDetails();
+            }
+        });
+
+        // Mobile menu toggle
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+
+        if (mobileMenuBtn && mobileMenu) {
+            mobileMenuBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+        }
+    </script>
+</body>
+</html>
