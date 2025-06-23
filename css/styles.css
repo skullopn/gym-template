@@ -1,0 +1,17 @@
+/* Custom styles */
+.hero {
+    background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('../assets/gym-hero.jpg');
+    background-size: cover;
+    background-position: center;
+}
+
+.workout-card:hover {
+    transform: translateY(-10px);
+    transition: transform 0.3s ease;
+}
+
+#bmiResult {
+    transition: all 0.3s ease;
+}
+
+/* Add any additional custom styles here */
